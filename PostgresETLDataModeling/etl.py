@@ -6,6 +6,10 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """
+    The function load and retrieve song and artist data records from song data file then 
+    insert these records intp song and artist table.
+    """
     # open song file
     df = pd.DataFrame(pd.read_json(filepath, lines=True, orient='columns'))
 
@@ -19,6 +23,13 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
+    """
+    First this function retrieves time, user records from data_log file,
+    retrieved records are inserted into time and user table then
+    retrieve song and artist records from log-data file which are
+    inserted into together with time and user required recored 
+    songplay table.
+    """
     # open log file
     df = pd.DataFrame(pd.read_json(filepath, lines=True, orient='columns'))
 
@@ -57,11 +68,16 @@ def process_log_file(cur, filepath):
 
         # insert songplay record
         t1 = pd.to_datetime(row.ts, unit='ms')
-        songplay_data = (index+1,t1, int(row.userId), row.level, songid, artistid, row.sessionId, row.location, row.userAgent)  
+        songplay_data = (t1, int(row.userId), row.level, songid, artistid, row.sessionId, row.location, row.userAgent)  
         cur.execute(songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
+     """
+    The main purpose of this function is to select file
+    with json extension, iterate over files and process file contents
+    if file exists.
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
@@ -81,6 +97,10 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
+    """
+    This is the main function establishing connection
+    to the database, then process data.
+    """
     conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=student password=student")
     cur = conn.cursor()
 
